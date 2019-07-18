@@ -12,6 +12,8 @@ private enum Constants {
     static let baseURL = "https://api.flickr.com/"
     static let APIKey = "f9cc014fa76b098f9e82f1c288379ea1"
     static let responseFormat = "json"
+    static let getSizesMethod = "flickr.photos.getSizes"
+    static let searchMethod = "flickr.photos.search"
 }
 
 extension FlickrAPI: EndpointType {
@@ -53,11 +55,11 @@ extension FlickrAPI: EndpointType {
         //para["nojsoncallback"] = "1"
         switch self {
         case .getImageSizes(let photoId):
-            params["method"] = "flickr.photos.getSizes"
+            params["method"] = Constants.getSizesMethod
             params["photo_id"] = photoId
             return params
         case .getImagesWithTags(let tags, let page):
-            params["method"] = "flickr.photos.search"
+            params["method"] = Constants.searchMethod
             params["page"] = page
             params["tags"] = tags.joined(separator: ",")
             return params

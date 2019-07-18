@@ -26,12 +26,14 @@ final class Router<Endpoint: EndpointType>: NetworkRouter {
              request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             return request
     }
+    
     private func addAdditionalHeaders(_ headers: HTTPHeaders?, request: inout URLRequest) {
         guard let headers = headers else { return }
         headers.forEach { key, value in
             request.setValue(value, forHTTPHeaderField: key)
         }
     }
+    
     private func configureParameters(bodyParameters: Parameters?,
                                      urlParameters: Parameters?,
                                      request: inout URLRequest) throws {

@@ -12,17 +12,12 @@ struct NetworkManager {
         case unableToDecode = "Could not decode"
         case networkFail = "Check your connection"
     }
-
-    enum Result<String> {
-        case success
-        case failure(String)
-    }
-
-    private func handleNetworkResponse(_ response: HTTPURLResponse) -> Result<String> {
+    
+    private func handleNetworkResponse(_ response: HTTPURLResponse) -> Result<Bool, NetworkError> {
         switch response.statusCode {
-        case 200...299: return .success
-        case 501...599: return .failure(NetworkResponse.badRequest.rawValue)
-        default: return .failure(NetworkResponse.failed.rawValue)
+        case 200...299: return .success(true)
+        case 501...599: return .failure(.failedBuildRequest)
+        default: return .failure(.failedBuildRequest)
         }
     }
 }
