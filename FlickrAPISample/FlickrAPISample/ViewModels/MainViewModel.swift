@@ -11,16 +11,17 @@ import UIKit
 protocol MainViewModelDelegate: class {
     func getTotalImagesCount() -> Int
     func getImages(for tags: [String], completion: @escaping () -> Void)
-    func getImage(for index: Int, completion: @escaping (UIImage?) -> Void)
+    func getImageUrl(for index: Int) -> String?
+    func cancelRequest()
 }
 
 final class MainViewModel {
     
     let networkManager: NetworkManager
-    var imageResults: ImageResults?
-    var isDownloading: Bool = false
-    var limitBeforeDownload: Int = 20
-    var totalInPage: Int = 0
+    private(set) var imageResults: ImageResults?
+    private(set) var isDownloading: Bool = false
+    private(set) var limitBeforeDownload: Int = 20
+    private(set) var totalInPage: Int = 0
     
     private enum Constants {
         static let defaultPage: Int = 1
@@ -32,31 +33,31 @@ final class MainViewModel {
     
     private func downloadImages(tags: [String], page: Int, completion: @escaping () -> Void) {
         self.isDownloading = true
-        networkManager.getImagesWithTags(page: page, tags: tags) { [unowned self] data, error in
+        networkManager.getImagesWithTags(page: page, tags: tags) { [weak self] data, error in
             guard let data = data else { return }
-            var count: Int = 0
+            guard let self = self else { return }
             
-            if self.imageResults == nil {
-                
-                self.imageResults = data
-                
-            } else {
-                
-                var photos = self.imageResults!.photo
+            if var imageResults = self.imageResults {
+                var photos = imageResults.photo
                 self.imageResults = data
                 photos.append(contentsOf: data.photo)
-                count = self.imageResults!.photo.count
-                self.imageResults!.photo = photos
+                imageResults.photo = photos
+                self.imageResults = imageResults
+            } else {
+                self.imageResults = data
             }
+            guard var imageResults = self.imageResults else { return }
             
-            self.totalInPage += self.imageResults!.photo.count
-            for index in count...self.imageResults!.photo.count-1 {
-                self.networkManager.getImageSize(photoId: self.imageResults!.photo[index].identifier) { [unowned self] sizes, error in
-                    guard error != nil else { return }
-                    self.imageResults!.photo[index].sizes = sizes
-                    if index == self.imageResults!.photo.count - 1 { self.isDownloading = false }
-                    completion()
-                }
+            self.totalInPage += imageResults.photo.count
+            for (n, photo) in imageResults.photo.enumerated() {
+                self.networkManager.getImageSize(photoId: photo.identifier,
+                                                 completion: { [weak self] sizes, error in
+                                                    guard error == nil else { return }
+                                                    imageResults.photo[n].sizes = sizes
+                                                    self?.imageResults = imageResults
+                                                    completion()
+                })
+                
             }
         }
     }
@@ -87,10 +88,12 @@ extension MainViewModel: MainViewModelDelegate {
         self.downloadImages(tags: tags, page: Constants.defaultPage, completion: completion)
     }
     
-    func getImage(for index: Int, completion: @escaping (UIImage?) -> Void) {
-        guard let imageResults = self.imageResults, let sizes = imageResults.photo[index].sizes else { return }
-        self.downloadImage(from: URL(string: sizes.size[1].source)!) { image in
-            completion(image)
-        }
+    func getImageUrl(for index: Int) -> String? {
+        guard let imageResults = self.imageResults, index < imageResults.photo.count, let sizes = imageResults.photo[index].sizes else { return nil }
+        return sizes.size[1].source
+    }
+    
+    func cancelRequest() {
+        self.networkManager.cancelRequest()
     }
 }

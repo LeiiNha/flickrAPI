@@ -15,7 +15,7 @@ final class SearchBar: UISearchBar {
         super.draw(rect)
         
         self.placeholder = "Search for a tag here :)"
-        self.barTintColor = Colors.primary
+        self.barTintColor = Colors.secondary
         self.searchBarStyle = UISearchBar.Style.prominent
         self.isTranslucent = false
     }

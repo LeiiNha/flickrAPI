@@ -11,12 +11,6 @@ struct NetworkManager {
         default: return .failure(.failedBuildRequest)
         }
     }
-    /*
-     case directUrl(url: URL)
-     case getImagesWithTags([String], Int)
-     case getImageSizes(String)
-     case getImageBySource(String)
-     */
     
     func getImagesWithTags(page: Int, tags: [String], completion: @escaping (ImageResults?, _ error: NetworkError?) -> Void) {
         router.request(.getImagesWithTags(tags, page), completion: { data, response, error in
@@ -43,6 +37,7 @@ struct NetworkManager {
             }
         })
     }
+    
     func getImageSize(photoId: String, completion: @escaping (Sizes?, _ error: NetworkError?) -> Void) {
         router.request(.getImageSizes(photoId), completion: { data, response, error in
             guard error == nil else {
@@ -67,5 +62,9 @@ struct NetworkManager {
                 }
             }
         })
+    }
+    
+    func cancelRequest() {
+        router.cancel()
     }
 }
