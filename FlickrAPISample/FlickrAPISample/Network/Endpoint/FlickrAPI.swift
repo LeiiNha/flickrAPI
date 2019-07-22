@@ -23,7 +23,7 @@ extension FlickrAPI: EndpointType {
         case .getImageBySource(let source):
             return URL(string: source)!
         default:
-            return URL(string: Constants.baseURL)!
+            return URL(string: Constants.baseURL)!.appendingPathComponent(self.path)
         }
     }
     
@@ -41,7 +41,10 @@ extension FlickrAPI: EndpointType {
     }
     
     var task: HTTPTask {
-        return .request
+        if let params = parameters {
+            return HTTPTask.requestParameters(bodyParameters: params, urlParameters: params)
+        }
+        return HTTPTask.request
     }
     
     var headers: HTTPHeaders? {
@@ -52,7 +55,7 @@ extension FlickrAPI: EndpointType {
         var params: [String: Any] = [:]
         params["api_key"] = Constants.APIKey
         params["format"] = Constants.responseFormat
-        //para["nojsoncallback"] = "1"
+        params["nojsoncallback"] = "1"
         switch self {
         case .getImageSizes(let photoId):
             params["method"] = Constants.getSizesMethod

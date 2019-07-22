@@ -24,7 +24,9 @@ final class Router<Endpoint: EndpointType>: NetworkRouter {
                                  cachePolicy: .reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: 100.0)
         request.httpMethod = endpoint.httpMethod.rawValue
              request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            return request
+        self.addAdditionalHeaders(endpoint.headers, request: &request)
+        try self.configureParameters(bodyParameters: nil, urlParameters: endpoint.parameters, request: &request)
+        return request
     }
     
     private func addAdditionalHeaders(_ headers: HTTPHeaders?, request: inout URLRequest) {
