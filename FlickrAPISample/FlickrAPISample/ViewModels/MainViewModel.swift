@@ -17,7 +17,7 @@ protocol MainViewModelDelegate: class {
 
 final class MainViewModel {
     
-    let networkManager: NetworkManager
+    let networkManager: NetworkManagerProtocol
     private(set) var imageResults: ImageResults?
     private(set) var isDownloading: Bool = false
     private(set) var limitBeforeDownload: Int = 20
@@ -27,7 +27,7 @@ final class MainViewModel {
         static let defaultPage: Int = 1
     }
     
-    init(networkManager: NetworkManager) {
+    init(networkManager: NetworkManagerProtocol) {
         self.networkManager = networkManager
     }
     

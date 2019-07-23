@@ -1,6 +1,12 @@
 
 import Foundation
-struct NetworkManager {
+
+protocol NetworkManagerProtocol {
+    func getImagesWithTags(page: Int, tags: [String], completion: @escaping (ImageResults?, _ error: NetworkError?) -> Void)
+    func getImageSize(photoId: String, completion: @escaping (Sizes?, _ error: NetworkError?) -> Void)
+    func cancelRequest()
+}
+struct NetworkManager: NetworkManagerProtocol {
 
     private let router = Router<FlickrAPI>()
     
